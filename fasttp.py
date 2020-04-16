@@ -9,6 +9,8 @@ from json import load, dump
 from itertools import chain
 from collections import deque
 from sys import stdout, stderr
+from tensorflow import keras
+import numpy as np
 
 FOLDER = '.fasttp'
 
@@ -59,27 +61,38 @@ def get_dependencies(profile, inputs, project_folder):
 						dependencies[path1].append(relpath(path2, project_folder))
 	return dependencies
 
-def dfs_changed(test, dependencies, changed):
-	neighbors = deque(dependencies.get(test, []))
-	visited = set(test)
+def bfs_features(test, dependencies, changed):
+	neighbors = deque(((test, 0),))
+	visited = set()
+	number_changed_dep = 0
+	len_shortest_path = 999999
+	avg_len_shortest_paths = 0
+	
 	while neighbors:
-		neighbor = neighbors.pop()
+		neighbor, dist = neighbors.popleft()
 		if neighbor not in visited:
 			visited.add(neighbor)
 			if neighbor in changed:
-				return True
-			elif neighbor in dependencies:
-				neighbors.extend(dependencies[neighbor])
-	return False
+				number_changed_dep += 1
+				if dist < len_shortest_path:
+					len_shortest_path = dist
+				avg_len_shortest_paths += dist
+			if neighbor in dependencies:
+				dist += 1
+				neighbors.extend((dep, dist) for dep in dependencies[neighbor])
+	
+	if number_changed_dep:
+		avg_len_shortest_paths /= number_changed_dep
+	else:
+		avg_len_shortest_paths = len_shortest_path
+	
+	return number_changed_dep, len_shortest_path, avg_len_shortest_paths
 
-def score_test(test, dependencies, changed):
-	number_changed_dep, len_shortest_path, avg_len_shortest_paths = bfs(test, dependencies, changed)
-	score = model(number_changed_dep, len_shortest_path, avg_len_shortest_paths)
-	return score
-
-def rank(tests, dependencies, changed):
-	ranked = ((score_test(test), test) for test in tests)
-	return sorted(ranked)
+def rank(model, tests, dependencies, changed):
+	features = np.array([bfs_features(test, dependencies, changed) for test in tests])
+	scores = (1.0 if test in changed else v[0].item() for v, test in zip(model.predict(features), tests))
+	ranked = zip(scores, tests)
+	return sorted(ranked, reverse=True)
 
 def tp(language, project_folder, test_folder, source_folder):
 	profile = dext.get_profile(language)
@@ -94,10 +107,12 @@ def tp(language, project_folder, test_folder, source_folder):
 	new_hashes = {file:sha1_file(join(project_folder, file)) for file in chain(test_files, source_files)}
 
 	changed = {file for file, hash in new_hashes.items() if file not in old_hashes or new_hashes[file] != old_hashes[file]}
+
 	inputs = [test_folder, source_folder] if test_folder != source_folder else [test_folder]
 	dependencies = get_dependencies(profile, inputs, project_folder)
-	ranked = rank(test_files, dependencies, changed)	
-	
+
+	model = keras.models.load_model('model')
+	ranked = rank(model, test_files, dependencies, changed)	
 	return ranked, dependencies, changed, new_hashes, test_files, source_files
 
 def save_jsons(project_folder, ranked, dependencies, changed, new_hashes):
@@ -131,7 +146,7 @@ def run(language, project_folder, test_folder, source_folder, verbose, output):
 
 	if output != '': print_results(ranked, output)
 
-	if verbose: log(ranked, dependencies, changed, test_files, source_files)
+	if verbose: log(dependencies, changed, test_files, source_files)
 
 def parse_args():
 	parser = arg_par(prog= 'python -m fasttp', description='Fasttp performs test case prioritization. Given a codebase that has changed, it rankes test cases according to their risk of revealing a fault. Find out more at https://github.com/GabrieleMaurina/fasttp')
