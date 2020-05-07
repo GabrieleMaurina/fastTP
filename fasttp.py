@@ -137,7 +137,7 @@ def log(dependencies, changed, test_files, source_files):
 	S = len(source_files)
 	C = len(changed)
 	D = sum(len(v) for v in dependencies.values())
-	print('***Fasttp results***\nTest files: {}\nSource files: {}\nChanged: {}\nDependencies: {}'.format(T, S, C, D), file=stderr)
+	print('***FastTP results***\nTest files: {}\nSource files: {}\nChanged: {}\nDependencies: {}'.format(T, S, C, D), file=stderr)
 
 def run(language, project_folder, test_folder, source_folder, verbose, output):
 	ranked, dependencies, changed, new_hashes, test_files, source_files = tp(language, project_folder, test_folder, source_folder)
@@ -149,7 +149,7 @@ def run(language, project_folder, test_folder, source_folder, verbose, output):
 	if verbose: log(dependencies, changed, test_files, source_files)
 
 def parse_args():
-	parser = arg_par(prog= 'python -m fasttp', description='Fasttp performs test case prioritization. Given a codebase that has changed, it rankes test cases according to their risk of revealing a fault. Find out more at https://github.com/GabrieleMaurina/fasttp')
+	parser = arg_par(prog= 'python -m fasttp', description='FastTP performs test case prioritization. Given a codebase that has changed, it rankes test cases according to their risk of revealing a fault. Find out more at https://github.com/GabrieleMaurina/fastTP')
 	parser.add_argument('-v', '--verbose', action='store_true', help='increase output verbosity')
 	parser.add_argument('-l', metavar='<lang profile>', default='all', help='set language profile (default "all")')
 	parser.add_argument('-p', metavar='<project folder>', default='.', help='set project folder (default "current working directory")')

@@ -1,12 +1,12 @@
-# Fasttp
+# FastTP
 ### Fast Test Prioritization
 ##### A tool to perform test prioritization
 
-Fasttp saves time when testing code!
+FastTP saves time when testing code!
 
-Given a codebase that has changed, this tool selects which tests are safe to execute. Only tests that involve changed code are selected. Tests that operate over untouched code shouldn't be run, so Fasttp doesn't select them. Therefore it saves a lot of time when doing regression testing over large projects or with large test suites.
+Given a codebase that has changed, this tool selects which tests are safe to execute. Only tests that involve changed code are selected. Tests that operate over untouched code shouldn't be run, so FastTP doesn't select them. Therefore it saves a lot of time when doing regression testing over large projects or with large test suites.
 
-Fasttp works well with many languages and it is based upon [Dext](https://github.com/GabrieleMaurina/dext "Dext github page"), a tool that extracts file dependencies from code.
+FastTP works well with many languages and it is based upon [Dext](https://github.com/GabrieleMaurina/dext "Dext github page"), a tool that extracts file dependencies from code.
 
 Run `python -m fasttp -h` for help.
 
@@ -21,7 +21,7 @@ The installation is done through python's package manager **pip**. Simply run:
 
 ### Usage
 
-Fasttp can be used as a stand alone module, or trough its API. The basic usage is:
+FastTP can be used as a stand alone module, or trough its API. The basic usage is:
 
 `python -m fasttp [-h] [-v] [-l <lang profile>] [-p <project folder>] [-t <test folder>] [-s <source folder>] [-o [<output>]]`
 
@@ -36,9 +36,9 @@ Optional arguments:
 
 ### Workflow
 
-The suggested workflow for using Fasttp that will save time during testing
+The suggested workflow for using FastTP that will save time during testing
 
-<img src="https://raw.githubusercontent.com/GabrieleMaurina/fasttp/master/workflow.png" alt="Workflow" width="500">
+<img src="https://raw.githubusercontent.com/GabrieleMaurina/fastTP/master/workflow.png" alt="Workflow" width="500">
 
 ### Output
 
@@ -46,28 +46,28 @@ When run, this tool generates, inside the project folder, a new folder named `.f
 * **selected.json** contains a json array with the paths to all the selected test files. This file should be used to instruct the testing utility on performing regression testing
 * **hash.json** contains a json object with all the sha1 of all the source files in the codebase
 * **dependencies.json** contains a json object with all the file dependencies in the codebase
-* **changed.json** contains a json array with all the changed classes since the previous Fasttp run
+* **changed.json** contains a json array with all the changed classes since the previous FastTP run
 
 ### API
 
-Fasttp API can be used by another script. Simply import `fasttp` to access its functions. Its main API is:
+FastTP API can be used by another script. Simply import `fasttp` to access its functions. Its main API is:
 * `main()`, to run the whole module as if it was called in the stand alone option.
-* `run(language, project_folder, test_folder, source_folder, verbose, output)`, to run Fasttp passing your own arguments
+* `run(language, project_folder, test_folder, source_folder, verbose, output)`, to run FastTP passing your own arguments
 * `rts(language, project_folder, test_folder, source_folder)`, to run just the rts part
 
-Example: runninf Fasttp from another script.
+Example: runninf FastTP from another script.
 
 ```python
-#import Fasttp module
+#import FastTP module
 >>> import fasttp
 
-#run Fasttp with language='java', project_folder='java-design-patterns/adapter/', test_folder='src/test', source_folder='src/main', verbose=False
+#run FastTP with language='java', project_folder='java-design-patterns/adapter/', test_folder='src/test', source_folder='src/main', verbose=False
 >>> selected, dependencies, changed, new_hashes, test_files, source_files = fasttp.rts('java', 'java-design-patterns/adapter/', 'src/test', 'src/main')
 ```
 
 ### Languages
 
-Fasttp supports many languages out of the box, including:
+FastTP supports many languages out of the box, including:
 * C
 * C++
 * C#
@@ -84,7 +84,7 @@ However many more languages are available. Read [Dext Language Profiles](https:/
 
 ### How it works
 
-FastRTS uses hashes to determine which files in a codebase have changed and then selects only tests that involve those files, thus saving a lot of time when running the test suite. The steps performed by Fasttp are:
+FastTP uses hashes to determine which files in a codebase have changed and then selects only tests that involve those files, thus saving a lot of time when running the test suite. The steps performed by FastTP are:
 * hash all source files in a codebase
 * compare new hashes with the older ones
 * mark any file with different hash as "changed"
@@ -97,7 +97,7 @@ FastRTS uses hashes to determine which files in a codebase have changed and then
 
 ### Advantages
 
-The advantages of using Fasttp are:
+The advantages of using FastTP are:
 * it works with many languages
 * it's lightweight (just a few scripts)
 * it's lightning fast to run (faster than other RTS tools)
